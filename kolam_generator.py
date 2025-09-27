@@ -8,7 +8,8 @@ including L-systems, fractals, symmetry, and geometric patterns.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import turtle
+if __name__ == "__main__":
+    import turtle
 import math
 from typing import List, Tuple, Dict, Any, Optional
 import random
@@ -561,7 +562,56 @@ class KolamGenerator:
         return patterns
 
 
-class TurtleKolamGenerator:
+if __name__ == "__main__":
+    class TurtleKolamGenerator:
+        """Kolam generator using Turtle graphics for interactive visualization."""
+        def __init__(self, size: int = 400):
+            self.size = size
+            self.turtle = turtle.Turtle()
+            self.screen = turtle.Screen()
+            self.setup_turtle()
+        def setup_turtle(self):
+            self.screen.setup(self.size, self.size)
+            self.screen.bgcolor('white')
+            self.turtle.speed(0)
+            self.turtle.penup()
+            self.turtle.goto(0, 0)
+            self.turtle.pendown()
+        def draw_fractal_kolam(self, iterations: int = 3):
+            lsystem = LSystem(
+                axiom="F+F+F+F",
+                rules={"F": "F+F-F-F+F", "+": "+", "-": "-"}
+            )
+            instructions = lsystem.iterate(iterations)
+            step_size = 5
+            angle_step = 90
+            for command in instructions:
+                if command == 'F':
+                    self.turtle.forward(step_size)
+                elif command == '+':
+                    self.turtle.right(angle_step)
+                elif command == '-':
+                    self.turtle.left(angle_step)
+        def draw_spiral_kolam(self, num_spirals: int = 4):
+            for i in range(num_spirals):
+                self.turtle.penup()
+                self.turtle.goto(0, 0)
+                self.turtle.pendown()
+                for j in range(100):
+                    self.turtle.forward(j * 0.1)
+                    self.turtle.right(90 + i * 10)
+        def draw_geometric_kolam(self, num_sides: int = 8):
+            for i in range(5):
+                self.turtle.penup()
+                self.turtle.goto(0, 0)
+                self.turtle.pendown()
+                for j in range(num_sides):
+                    self.turtle.forward(50 + i * 10)
+                    self.turtle.right(360 / num_sides)
+        def save_screen(self, filename: str):
+            self.screen.getcanvas().postscript(file=filename)
+        def close(self):
+            self.screen.bye()
     """Kolam generator using Turtle graphics for interactive visualization."""
     
     def __init__(self, size: int = 400):
@@ -619,46 +669,39 @@ class TurtleKolamGenerator:
             self.turtle.goto(0, 0)
             self.turtle.pendown()
             
-            # Draw polygon
-            for j in range(num_sides):
-                self.turtle.forward(50 + i * 10)
-                self.turtle.right(360 / num_sides)
-    
-    def save_screen(self, filename: str):
-        """Save the turtle screen."""
-        self.screen.getcanvas().postscript(file=filename)
-    
-    def close(self):
-        """Close the turtle screen."""
-        self.screen.bye()
-
-
-def main():
-    """Example usage of the KolamGenerator."""
-    # Create generator with custom parameters
-    params = KolamParameters(
-        size=300,
-        complexity=4,
-        symmetry_type='radial',
-        pattern_type='fractal',
-        color_scheme='gradient'
-    )
-    
-    generator = KolamGenerator(params)
-    
-    # Generate different types of patterns
-    pattern_types = ['fractal', 'spiral', 'grid', 'geometric', 'traditional']
-    
-    for i, pattern_type in enumerate(pattern_types):
-        print(f"Generating {pattern_type} pattern...")
-        pattern = generator.generate(pattern_type)
-        generator.save_pattern(pattern, f'kolam_{pattern_type}_{i+1}.png')
-    
-    # Generate batch of random patterns
-    print("Generating batch of random patterns...")
-    random_patterns = generator.generate_batch(5)
-    
-    for i, pattern in enumerate(random_patterns):
+            if __name__ == "__main__":
+                def main():
+                    """Example usage of the KolamGenerator."""
+                    params = KolamParameters(
+                        size=300,
+                        complexity=4,
+                        symmetry_type='radial',
+                        pattern_type='fractal',
+                        color_scheme='gradient'
+                    )
+                    generator = KolamGenerator(params)
+                    pattern_types = ['fractal', 'spiral', 'grid', 'geometric', 'traditional']
+                    for i, pattern_type in enumerate(pattern_types):
+                        print(f"Generating {pattern_type} pattern...")
+                        pattern = generator.generate(pattern_type)
+                        generator.save_pattern(pattern, f'kolam_{pattern_type}_{i+1}.png')
+                    print("Generating batch of random patterns...")
+                    random_patterns = generator.generate_batch(5)
+                    for i, pattern in enumerate(random_patterns):
+                        generator.save_pattern(pattern, f'kolam_random_{i+1}.png')
+                    print("Pattern generation complete!")
+                    print("Starting interactive turtle demonstration...")
+                    turtle_gen = TurtleKolamGenerator()
+                    turtle_gen.draw_fractal_kolam(3)
+                    turtle_gen.save_screen('turtle_fractal_kolam.eps')
+                    turtle_gen.screen.clear()
+                    turtle_gen.draw_spiral_kolam(4)
+                    turtle_gen.save_screen('turtle_spiral_kolam.eps')
+                    turtle_gen.screen.clear()
+                    turtle_gen.draw_geometric_kolam(8)
+                    turtle_gen.save_screen('turtle_geometric_kolam.eps')
+                    turtle_gen.close()
+                main()
         generator.save_pattern(pattern, f'kolam_random_{i+1}.png')
     
     print("Pattern generation complete!")
