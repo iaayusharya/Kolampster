@@ -1,0 +1,86 @@
+/* Additional custom styles for Kolam Scanner */
+
+/* Ensure proper mobile viewport */
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Fix for mobile camera issues */
+#video {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    object-fit: cover;
+}
+
+/* Ensure buttons are touch-friendly on mobile */
+.btn {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Fix for drag and drop area */
+.upload-area {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensure images are responsive */
+.pattern-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Loading spinner improvements */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+    .main-container {
+        margin: 5px;
+        padding: 15px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .btn {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .camera-container {
+        margin: 10px 0;
+    }
+}
+
+/* Fix for camera controls on mobile */
+.camera-controls .btn {
+    margin: 5px;
+    flex: 1;
+}
+
+/* Ensure proper text wrapping */
+.analysis-metric {
+    word-wrap: break-word;
+}
+
+/* Fix for badge display */
+.badge {
+    font-size: 0.8rem;
+    margin: 2px;
+}
