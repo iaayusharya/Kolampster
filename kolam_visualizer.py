@@ -246,52 +246,50 @@ class KolamVisualizer:
             analysis: Analysis results from KolamAnalyzer
             save_path: Path to save the plot
         """
-        # Extract analysis data
-        symmetry_data = analysis['symmetry_analysis']
-        fractal_data = analysis['fractal_analysis']
-        topology_data = analysis['topology_analysis']
-        
-        # Create data matrix for heatmap
-        data = np.array([
-            [symmetry_data['radial_symmetry']['score'], 
-             symmetry_data['bilateral_symmetry']['max_score'],
-             symmetry_data['rotational_symmetry']['best_score']],
-            [fractal_data['box_dimension'] / 2,  # Normalize
-             fractal_data['self_similarity'],
-             fractal_data['recursive_structure']['has_recursive_structure']],
-            [topology_data['total_components'] / 10,  # Normalize
-             topology_data['total_holes'] / 5,  # Normalize
-             topology_data['total_loops'] / 5]  # Normalize
-        ])
-        
-        # Create heatmap
-        fig, ax = plt.subplots(figsize=(10, 8))
-        
-        im = ax.imshow(data, cmap='YlOrRd', aspect='auto')
-        
-        # Set labels
-        ax.set_xticks(range(3))
-        ax.set_xticklabels(['Radial', 'Bilateral', 'Rotational'])
-        ax.set_yticks(range(3))
-        ax.set_yticklabels(['Symmetry', 'Fractal', 'Topology'])
-        
-        # Add text annotations
-        for i in range(3):
-            for j in range(3):
-                text = ax.text(j, i, f'{data[i, j]:.2f}',
-                             ha="center", va="center", color="black", fontweight='bold')
-        
-        ax.set_title('Kolam Analysis Heatmap', fontsize=16, fontweight='bold')
-        
-        # Add colorbar
-        cbar = plt.colorbar(im, ax=ax)
-        cbar.set_label('Analysis Score')
-        
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        try:
+            # Extract analysis data
+            symmetry_data = analysis['symmetry_analysis']
+            fractal_data = analysis['fractal_analysis']
+            topology_data = analysis['topology_analysis']
+            # Create data matrix for heatmap
+            data = np.array([
+                [symmetry_data['radial_symmetry']['score'], 
+                 symmetry_data['bilateral_symmetry']['max_score'],
+                 symmetry_data['rotational_symmetry']['best_score']],
+                [fractal_data['box_dimension'] / 2,  # Normalize
+                 fractal_data['self_similarity'],
+                 fractal_data['recursive_structure']['has_recursive_structure']],
+                [topology_data['total_components'] / 10,  # Normalize
+                 topology_data['total_holes'] / 5,  # Normalize
+                 topology_data['total_loops'] / 5]  # Normalize
+            ])
+            # Create heatmap with smaller figure and lower DPI
+            fig, ax = plt.subplots(figsize=(5, 4))
+            im = ax.imshow(data, cmap='YlOrRd', aspect='auto')
+            # Set labels
+            ax.set_xticks(range(3))
+            ax.set_xticklabels(['Radial', 'Bilateral', 'Rotational'])
+            ax.set_yticks(range(3))
+            ax.set_yticklabels(['Symmetry', 'Fractal', 'Topology'])
+            # Add text annotations
+            for i in range(3):
+                for j in range(3):
+                    text = ax.text(j, i, f'{data[i, j]:.2f}',
+                                 ha="center", va="center", color="black", fontweight='bold')
+            ax.set_title('Kolam Analysis Heatmap', fontsize=12, fontweight='bold')
+            # Add colorbar
+            cbar = plt.colorbar(im, ax=ax)
+            cbar.set_label('Analysis Score')
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=100, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"plot_analysis_heatmap failed: {e}")
+            if save_path:
+                # Optionally, create a blank file or skip
+                pass
+    
     # plt.show() removed for server compatibility
     
     def plot_interactive_3d(self, pattern: np.ndarray, title: str = "Interactive 3D Kolam"):
