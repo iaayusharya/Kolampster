@@ -70,19 +70,18 @@ class KolamVisualizer:
             show_analysis: Whether to show analysis overlay
         """
         print(f"DEBUG: plot_pattern called, shape: {pattern.shape}, DPI=72")
-        if not np.isfinite(pattern).all():
-            print("plot_pattern: pattern contains NaN or inf! Skipping plot.")
-            if save_path:
-                # Create a blank placeholder image
-                import matplotlib.pyplot as plt
-                fig, ax = plt.subplots(figsize=(3, 3))
-                ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=12)
-                ax.axis('off')
-                plt.tight_layout()
-                plt.savefig(save_path, dpi=72, bbox_inches='tight')
-                plt.close(fig)
-            return
         try:
+            if not np.isfinite(pattern).all():
+                print("plot_pattern: pattern contains NaN or inf! Skipping plot.")
+                if save_path:
+                    # Create a blank placeholder image
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=12)
+                    ax.axis('off')
+                    plt.tight_layout()
+                    plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                    plt.close(fig)
+                return
             fig, ax = plt.subplots(figsize=(3, 3))
             # Plot the pattern
             im = ax.imshow(pattern, cmap='viridis', origin='lower')
@@ -152,38 +151,49 @@ class KolamVisualizer:
             titles: List of titles for each pattern
             save_path: Path to save the plot
         """
-        n_patterns = len(patterns)
-        if titles is None:
-            titles = [f"Pattern {i+1}" for i in range(n_patterns)]
-        
-        # Calculate subplot layout
-        cols = min(3, n_patterns)
-        rows = (n_patterns + cols - 1) // cols
-        
-        fig, axes = plt.subplots(rows, cols, figsize=(5*cols, 5*rows))
-        if n_patterns == 1:
-            axes = [axes]
-        elif rows == 1:
-            axes = [axes]
-        else:
-            axes = axes.flatten()
-        
-        for i, (pattern, title) in enumerate(zip(patterns, titles)):
-            if i < len(axes):
-                im = axes[i].imshow(pattern, cmap='viridis')
-                axes[i].set_title(title, fontsize=14)
-                axes[i].set_xticks([])
-                axes[i].set_yticks([])
-        
-        # Hide unused subplots
-        for i in range(n_patterns, len(axes)):
-            axes[i].set_visible(False)
-        
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        try:
+            n_patterns = len(patterns)
+            if titles is None:
+                titles = [f"Pattern {i+1}" for i in range(n_patterns)]
+            # Calculate subplot layout
+            cols = min(3, n_patterns)
+            rows = (n_patterns + cols - 1) // cols
+            fig, axes = plt.subplots(rows, cols, figsize=(3*cols, 3*rows))
+            if n_patterns == 1:
+                axes = [axes]
+            elif rows == 1:
+                axes = [axes]
+            else:
+                axes = axes.flatten()
+            for i, (pattern, title) in enumerate(zip(patterns, titles)):
+                if i < len(axes):
+                    if not np.isfinite(pattern).all():
+                        axes[i].text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=10)
+                        axes[i].set_title(title)
+                        axes[i].set_xticks([])
+                        axes[i].set_yticks([])
+                        continue
+                    im = axes[i].imshow(pattern, cmap='viridis')
+                    axes[i].set_title(title, fontsize=10)
+                    axes[i].set_xticks([])
+                    axes[i].set_yticks([])
+            # Hide unused subplots
+            for i in range(n_patterns, len(axes)):
+                axes[i].set_visible(False)
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"plot_comparison failed: {e}")
+            if save_path:
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=10)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+    
     # plt.show() removed for server compatibility
     
     def plot_3d_pattern(self, pattern: np.ndarray, title: str = "3D Kolam Pattern",
@@ -196,30 +206,42 @@ class KolamVisualizer:
             title: Title for the plot
             save_path: Path to save the plot
         """
-        fig = plt.figure(figsize=(12, 10))
-        ax = fig.add_subplot(111, projection='3d')
-        
-        # Create coordinate grids
-        height, width = pattern.shape
-        x = np.arange(width)
-        y = np.arange(height)
-        X, Y = np.meshgrid(x, y)
-        
-        # Plot the 3D surface
-        surf = ax.plot_surface(X, Y, pattern, cmap='viridis', alpha=0.8)
-        
-        # Customize the plot
-        ax.set_title(title, fontsize=16, fontweight='bold')
-        ax.set_xlabel('X Coordinate')
-        ax.set_ylabel('Y Coordinate')
-        ax.set_zlabel('Pattern Intensity')
-        
-        # Add colorbar
-        fig.colorbar(surf, ax=ax, shrink=0.5, aspect=20)
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        try:
+            if not np.isfinite(pattern).all():
+                print("plot_3d_pattern: pattern contains NaN or inf! Skipping plot.")
+                if save_path:
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=10)
+                    ax.axis('off')
+                    plt.tight_layout()
+                    plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                    plt.close(fig)
+                return
+            fig = plt.figure(figsize=(6, 5))
+            ax = fig.add_subplot(111, projection='3d')
+            height, width = pattern.shape
+            x = np.arange(width)
+            y = np.arange(height)
+            X, Y = np.meshgrid(x, y)
+            surf = ax.plot_surface(X, Y, pattern, cmap='viridis', alpha=0.8)
+            ax.set_title(title, fontsize=10, fontweight='bold')
+            ax.set_xlabel('X Coordinate')
+            ax.set_ylabel('Y Coordinate')
+            ax.set_zlabel('Pattern Intensity')
+            fig.colorbar(surf, ax=ax, shrink=0.5, aspect=20)
+            if save_path:
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"plot_3d_pattern failed: {e}")
+            if save_path:
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=10)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+    
     # plt.show() removed for server compatibility
     
     def create_animation(self, patterns: List[np.ndarray], title: str = "Kolam Animation",
@@ -339,8 +361,8 @@ class KolamVisualizer:
                 yaxis_title='Y Coordinate',
                 zaxis_title='Pattern Intensity'
             ),
-            width=800,
-            height=600
+            width=400,
+            height=300
         )
         
         fig.show()
@@ -420,53 +442,62 @@ class KolamVisualizer:
             pattern: 2D numpy array representing the Kolam pattern
             save_path: Path to save the plot
         """
-        analyzer = KolamAnalyzer()
-        fractal_analysis = analyzer.analyze_fractal_properties(pattern)
-        
-        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-        fig.suptitle('Fractal Analysis of Kolam Pattern', fontsize=16, fontweight='bold')
-        
-        # Original pattern
-        axes[0, 0].imshow(pattern, cmap='viridis')
-        axes[0, 0].set_title('Original Pattern')
-        axes[0, 0].set_xticks([])
-        axes[0, 0].set_yticks([])
-        
-        # Box-counting analysis
-        box_dim = fractal_analysis['box_dimension']
-        axes[0, 1].text(0.5, 0.5, f'Box Dimension: {box_dim:.3f}', 
-                       ha='center', va='center', fontsize=14, fontweight='bold')
-        axes[0, 1].set_title('Fractal Dimension')
-        axes[0, 1].set_xticks([])
-        axes[0, 1].set_yticks([])
-        
-        # Self-similarity analysis
-        self_sim = fractal_analysis['self_similarity']
-        axes[1, 0].text(0.5, 0.5, f'Self-Similarity: {self_sim:.3f}', 
-                       ha='center', va='center', fontsize=14, fontweight='bold')
-        axes[1, 0].set_title('Self-Similarity Score')
-        axes[1, 0].set_xticks([])
-        axes[1, 0].set_yticks([])
-        
-        # Recursive structure
-        recursive = fractal_analysis['recursive_structure']
-        recursive_text = f"Has Recursive Structure: {recursive['has_recursive_structure']}\n"
-        if recursive['grid_periodicity']['has_grid']:
-            recursive_text += f"Grid Period: {recursive['grid_periodicity']['period']}\n"
-        if recursive['spiral_detection']['has_spiral']:
-            recursive_text += f"Spiral Score: {recursive['spiral_detection']['spiral_score']:.3f}"
-        
-        axes[1, 1].text(0.5, 0.5, recursive_text, 
-                       ha='center', va='center', fontsize=12)
-        axes[1, 1].set_title('Recursive Structure')
-        axes[1, 1].set_xticks([])
-        axes[1, 1].set_yticks([])
-        
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        try:
+            if not np.isfinite(pattern).all():
+                print("plot_fractal_analysis: pattern contains NaN or inf! Skipping plot.")
+                if save_path:
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=10)
+                    ax.axis('off')
+                    plt.tight_layout()
+                    plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                    plt.close(fig)
+                return
+            analyzer = KolamAnalyzer()
+            fractal_analysis = analyzer.analyze_fractal_properties(pattern)
+            fig, axes = plt.subplots(2, 2, figsize=(6, 5))
+            fig.suptitle('Fractal Analysis of Kolam Pattern', fontsize=12, fontweight='bold')
+            axes[0, 0].imshow(pattern, cmap='viridis')
+            axes[0, 0].set_title('Original Pattern')
+            axes[0, 0].set_xticks([])
+            axes[0, 0].set_yticks([])
+            box_dim = fractal_analysis['box_dimension']
+            axes[0, 1].text(0.5, 0.5, f'Box Dimension: {box_dim:.3f}', 
+                           ha='center', va='center', fontsize=10, fontweight='bold')
+            axes[0, 1].set_title('Fractal Dimension')
+            axes[0, 1].set_xticks([])
+            axes[0, 1].set_yticks([])
+            self_sim = fractal_analysis['self_similarity']
+            axes[1, 0].text(0.5, 0.5, f'Self-Similarity: {self_sim:.3f}', 
+                           ha='center', va='center', fontsize=10, fontweight='bold')
+            axes[1, 0].set_title('Self-Similarity Score')
+            axes[1, 0].set_xticks([])
+            axes[1, 0].set_yticks([])
+            recursive = fractal_analysis['recursive_structure']
+            recursive_text = f"Has Recursive Structure: {recursive['has_recursive_structure']}\n"
+            if recursive['grid_periodicity']['has_grid']:
+                recursive_text += f"Grid Period: {recursive['grid_periodicity']['period']}\n"
+            if recursive['spiral_detection']['has_spiral']:
+                recursive_text += f"Spiral Score: {recursive['spiral_detection']['spiral_score']:.3f}"
+            axes[1, 1].text(0.5, 0.5, recursive_text, 
+                           ha='center', va='center', fontsize=9)
+            axes[1, 1].set_title('Recursive Structure')
+            axes[1, 1].set_xticks([])
+            axes[1, 1].set_yticks([])
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"plot_fractal_analysis failed: {e}")
+            if save_path:
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=10)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+    
     # plt.show() removed for server compatibility
     
     def create_symmetry_visualization(self, pattern: np.ndarray, save_path: str = None):
@@ -477,58 +508,68 @@ class KolamVisualizer:
             pattern: 2D numpy array representing the Kolam pattern
             save_path: Path to save the plot
         """
-        analyzer = KolamAnalyzer()
-        symmetry_analysis = analyzer.analyze_symmetry(pattern)
-        
-        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-        fig.suptitle('Symmetry Analysis of Kolam Pattern', fontsize=16, fontweight='bold')
-        
-        # Original pattern
-        axes[0, 0].imshow(pattern, cmap='viridis')
-        axes[0, 0].set_title('Original Pattern')
-        axes[0, 0].set_xticks([])
-        axes[0, 0].set_yticks([])
-        
-        # Radial symmetry
-        radial = symmetry_analysis['radial_symmetry']
-        if radial['is_radial']:
-            center = radial['center']
-            axes[0, 1].imshow(pattern, cmap='viridis')
-            axes[0, 1].plot(center[1], center[0], 'r+', markersize=15, markeredgewidth=3)
-            axes[0, 1].set_title(f'Radial Symmetry (Score: {radial["score"]:.3f})')
-        else:
-            axes[0, 1].text(0.5, 0.5, 'No Radial Symmetry', ha='center', va='center')
-            axes[0, 1].set_title('Radial Symmetry')
-        axes[0, 1].set_xticks([])
-        axes[0, 1].set_yticks([])
-        
-        # Bilateral symmetry
-        bilateral = symmetry_analysis['bilateral_symmetry']
-        axes[1, 0].imshow(pattern, cmap='viridis')
-        if bilateral['is_bilateral']:
-            height, width = pattern.shape
-            axes[1, 0].axhline(y=height//2, color='b', linestyle='--', alpha=0.7)
-            axes[1, 0].axvline(x=width//2, color='b', linestyle='--', alpha=0.7)
-            axes[1, 0].set_title(f'Bilateral Symmetry (Score: {bilateral["max_score"]:.3f})')
-        else:
-            axes[1, 0].set_title('Bilateral Symmetry')
-        axes[1, 0].set_xticks([])
-        axes[1, 0].set_yticks([])
-        
-        # Rotational symmetry
-        rotational = symmetry_analysis['rotational_symmetry']
-        axes[1, 1].text(0.5, 0.5, f'Best Rotational Symmetry: {rotational["best_angle"]}\n'
-                                 f'Score: {rotational["best_score"]:.3f}', 
-                       ha='center', va='center', fontsize=12)
-        axes[1, 1].set_title('Rotational Symmetry')
-        axes[1, 1].set_xticks([])
-        axes[1, 1].set_yticks([])
-        
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        try:
+            if not np.isfinite(pattern).all():
+                print("create_symmetry_visualization: pattern contains NaN or inf! Skipping plot.")
+                if save_path:
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=10)
+                    ax.axis('off')
+                    plt.tight_layout()
+                    plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                    plt.close(fig)
+                return
+            analyzer = KolamAnalyzer()
+            symmetry_analysis = analyzer.analyze_symmetry(pattern)
+            fig, axes = plt.subplots(2, 2, figsize=(6, 5))
+            fig.suptitle('Symmetry Analysis of Kolam Pattern', fontsize=12, fontweight='bold')
+            axes[0, 0].imshow(pattern, cmap='viridis')
+            axes[0, 0].set_title('Original Pattern')
+            axes[0, 0].set_xticks([])
+            axes[0, 0].set_yticks([])
+            radial = symmetry_analysis['radial_symmetry']
+            if radial['is_radial']:
+                center = radial['center']
+                axes[0, 1].imshow(pattern, cmap='viridis')
+                axes[0, 1].plot(center[1], center[0], 'r+', markersize=10, markeredgewidth=2)
+                axes[0, 1].set_title(f'Radial Symmetry (Score: {radial["score"]:.3f})')
+            else:
+                axes[0, 1].text(0.5, 0.5, 'No Radial Symmetry', ha='center', va='center')
+                axes[0, 1].set_title('Radial Symmetry')
+            axes[0, 1].set_xticks([])
+            axes[0, 1].set_yticks([])
+            bilateral = symmetry_analysis['bilateral_symmetry']
+            axes[1, 0].imshow(pattern, cmap='viridis')
+            if bilateral['is_bilateral']:
+                height, width = pattern.shape
+                axes[1, 0].axhline(y=height//2, color='b', linestyle='--', alpha=0.7)
+                axes[1, 0].axvline(x=width//2, color='b', linestyle='--', alpha=0.7)
+                axes[1, 0].set_title(f'Bilateral Symmetry (Score: {bilateral["max_score"]:.3f})')
+            else:
+                axes[1, 0].set_title('Bilateral Symmetry')
+            axes[1, 0].set_xticks([])
+            axes[1, 0].set_yticks([])
+            rotational = symmetry_analysis['rotational_symmetry']
+            axes[1, 1].text(0.5, 0.5, f'Best Rotational Symmetry: {rotational["best_angle"]}\n'
+                                     f'Score: {rotational["best_score"]:.3f}', 
+                           ha='center', va='center', fontsize=9)
+            axes[1, 1].set_title('Rotational Symmetry')
+            axes[1, 1].set_xticks([])
+            axes[1, 1].set_yticks([])
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"create_symmetry_visualization failed: {e}")
+            if save_path:
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=10)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+    
     # plt.show() removed for server compatibility
 
 
