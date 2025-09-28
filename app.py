@@ -18,6 +18,8 @@ import json
 from datetime import datetime
 import uuid
 import traceback
+import matplotlib
+matplotlib.use('Agg')
 
 # Import our Kolam analysis system
 from kolam_analyzer import KolamAnalyzer
@@ -92,8 +94,8 @@ def preprocess_image(image_data):
         
         # Resize if too large (for faster performance)
         height, width = gray.shape
-        if max(height, width) > 500:  # Reduced from 1000 to 500 for faster processing
-            scale = 500 / max(height, width)
+        if max(height, width) > 300:  # Reduced from 500 to 300 for lower memory usage
+            scale = 300 / max(height, width)
             new_width = int(width * scale)
             new_height = int(height * scale)
             gray = cv2.resize(gray, (new_width, new_height))
@@ -174,6 +176,7 @@ def analyze_kolam_image(image_array):
             plt.savefig(symmetry_path, dpi=150, bbox_inches='tight')
             plt.close()
         except Exception as e:
+                plt.close()
             print(f"Symmetry visualization failed: {e}")
             symmetry_path = None
         
@@ -430,6 +433,14 @@ def get_pattern_types():
         'symmetry_types': ['radial', 'bilateral', 'rotational', 'none'],
         'color_schemes': ['monochrome', 'gradient', 'rainbow']
     })
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+    return jsonify({
+        "error": str(e),
+        "traceback": traceback.format_exc()
+    }), 500
 
 
 if __name__ == '__main__':
