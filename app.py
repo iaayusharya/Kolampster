@@ -176,7 +176,7 @@ def analyze_kolam_image(image_array):
             plt.savefig(symmetry_path, dpi=150, bbox_inches='tight')
             plt.close()
         except Exception as e:
-                plt.close()
+            plt.close()
             print(f"Symmetry visualization failed: {e}")
             symmetry_path = None
         
