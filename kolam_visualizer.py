@@ -69,33 +69,51 @@ class KolamVisualizer:
             save_path: Path to save the plot
             show_analysis: Whether to show analysis overlay
         """
-        fig, ax = plt.subplots(figsize=(10, 10))
-        
-        # Plot the pattern
-        im = ax.imshow(pattern, cmap='viridis', origin='lower')
-        
-        # Add analysis overlay if requested
-        if show_analysis:
-            self._add_analysis_overlay(ax, pattern)
-        
-        # Customize plot
-        ax.set_title(title, fontsize=16, fontweight='bold')
-        ax.set_xlabel('X Coordinate')
-        ax.set_ylabel('Y Coordinate')
-        
-        # Add colorbar
-        cbar = plt.colorbar(im, ax=ax)
-        cbar.set_label('Pattern Intensity')
-        
-        # Remove ticks for cleaner look
-        ax.set_xticks([])
-        ax.set_yticks([])
-        
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+        print(f"DEBUG: plot_pattern called, shape: {pattern.shape}, DPI=72")
+        if not np.isfinite(pattern).all():
+            print("plot_pattern: pattern contains NaN or inf! Skipping plot.")
+            if save_path:
+                # Create a blank placeholder image
+                import matplotlib.pyplot as plt
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=12)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+            return
+        try:
+            fig, ax = plt.subplots(figsize=(3, 3))
+            # Plot the pattern
+            im = ax.imshow(pattern, cmap='viridis', origin='lower')
+            # Add analysis overlay if requested
+            if show_analysis:
+                self._add_analysis_overlay(ax, pattern)
+            # Customize plot
+            ax.set_title(title, fontsize=10, fontweight='bold')
+            ax.set_xlabel('X Coordinate')
+            ax.set_ylabel('Y Coordinate')
+            # Add colorbar
+            cbar = plt.colorbar(im, ax=ax)
+            cbar.set_label('Pattern Intensity')
+            # Remove ticks for cleaner look
+            ax.set_xticks([])
+            ax.set_yticks([])
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"plot_pattern failed: {e}")
+            if save_path:
+                # Create a blank placeholder image
+                fig, ax = plt.subplots(figsize=(3, 3))
+                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=12)
+                ax.axis('off')
+                plt.tight_layout()
+                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+                plt.close(fig)
+    
     # plt.show() removed for server compatibility
     
     def _add_analysis_overlay(self, ax, pattern: np.ndarray):
