@@ -206,41 +206,14 @@ class KolamVisualizer:
             title: Title for the plot
             save_path: Path to save the plot
         """
-        try:
-            if not np.isfinite(pattern).all():
-                print("plot_3d_pattern: pattern contains NaN or inf! Skipping plot.")
-                if save_path:
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.text(0.5, 0.5, 'Invalid Data', ha='center', va='center', fontsize=10)
-                    ax.axis('off')
-                    plt.tight_layout()
-                    plt.savefig(save_path, dpi=72, bbox_inches='tight')
-                    plt.close(fig)
-                return
-            fig = plt.figure(figsize=(6, 5))
-            ax = fig.add_subplot(111, projection='3d')
-            height, width = pattern.shape
-            x = np.arange(width)
-            y = np.arange(height)
-            X, Y = np.meshgrid(x, y)
-            surf = ax.plot_surface(X, Y, pattern, cmap='viridis', alpha=0.8)
-            ax.set_title(title, fontsize=10, fontweight='bold')
-            ax.set_xlabel('X Coordinate')
-            ax.set_ylabel('Y Coordinate')
-            ax.set_zlabel('Pattern Intensity')
-            fig.colorbar(surf, ax=ax, shrink=0.5, aspect=20)
-            if save_path:
-                plt.savefig(save_path, dpi=72, bbox_inches='tight')
+        print("plot_3d_pattern: Skipping 3D plot due to server memory constraints.")
+        if save_path:
+            fig, ax = plt.subplots(figsize=(3, 3))
+            ax.text(0.5, 0.5, '3D Plot Disabled', ha='center', va='center', fontsize=10)
+            ax.axis('off')
+            plt.tight_layout()
+            plt.savefig(save_path, dpi=72, bbox_inches='tight')
             plt.close(fig)
-        except Exception as e:
-            print(f"plot_3d_pattern failed: {e}")
-            if save_path:
-                fig, ax = plt.subplots(figsize=(3, 3))
-                ax.text(0.5, 0.5, 'Plot Error', ha='center', va='center', fontsize=10)
-                ax.axis('off')
-                plt.tight_layout()
-                plt.savefig(save_path, dpi=72, bbox_inches='tight')
-                plt.close(fig)
     
     # plt.show() removed for server compatibility
     
